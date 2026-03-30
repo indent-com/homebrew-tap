@@ -2,11 +2,25 @@
 
 const REPO = "indent-com/blit";
 
-const BINARIES = [
+type Binary = {
+  name: string;
+  desc: string;
+  serviceEnv?: Record<string, string>;
+};
+
+const BINARIES: readonly Binary[] = [
   { name: "blit", desc: "Low-latency terminal streaming client" },
-  { name: "blit-server", desc: "Low-latency terminal streaming server", service: true },
-  { name: "blit-gateway", desc: "Low-latency terminal streaming WebSocket gateway", service: true },
-] as const;
+  {
+    name: "blit-server",
+    desc: "Low-latency terminal streaming server",
+    serviceEnv: { BLIT_SOCK: "/tmp/blit.sock", BLIT_SCROLLBACK: "10000" },
+  },
+  {
+    name: "blit-gateway",
+    desc: "Low-latency terminal streaming WebSocket gateway",
+    serviceEnv: { BLIT_SOCK: "/tmp/blit.sock", BLIT_ADDR: "127.0.0.1:3264" },
+  },
+];
 
 const PLATFORMS = [
   { os: "darwin", arch: "aarch64" },
@@ -25,26 +39,21 @@ function formulaClass(name: string): string {
   return name.split("-").map((w) => w[0].toUpperCase() + w.slice(1)).join("");
 }
 
-const SERVICE_BLOCKS: Record<string, string> = {
-  "blit-server": `
+function serviceBlock(bin: Binary): string {
+  if (!bin.serviceEnv) return "";
+  const envPairs = Object.entries(bin.serviceEnv)
+    .map(([k, v]) => `${k}: "${v}"`)
+    .join(", ");
+  return `
   service do
-    run [opt_bin/"blit-server"]
+    run [opt_bin/"${bin.name}"]
     keep_alive true
-    environment_variables BLIT_SOCK: "/tmp/blit.sock", BLIT_SCROLLBACK: "10000"
-    log_path var/"log/blit-server.log"
-    error_log_path var/"log/blit-server.log"
+    environment_variables ${envPairs}
+    log_path var/"log/${bin.name}.log"
+    error_log_path var/"log/${bin.name}.log"
   end
-`,
-  "blit-gateway": `
-  service do
-    run [opt_bin/"blit-gateway"]
-    keep_alive true
-    environment_variables BLIT_SOCK: "/tmp/blit.sock", BLIT_ADDR: "127.0.0.1:3264"
-    log_path var/"log/blit-gateway.log"
-    error_log_path var/"log/blit-gateway.log"
-  end
-`,
-};
+`;
+}
 
 async function main() {
   let version = process.argv[2]?.replace(/^v/, "");
@@ -95,7 +104,7 @@ async function main() {
   def install
     bin.install "${bin.name}"
   end
-${SERVICE_BLOCKS[bin.name] ?? ""}
+${serviceBlock(bin)}
   test do
     assert_match version.to_s, shell_output("#{bin}/${bin.name} --version")
   end
