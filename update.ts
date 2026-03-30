@@ -2,11 +2,17 @@
 
 const REPO = "indent-com/blit";
 
-const BINARIES = [
+type Binary = {
+  name: string;
+  desc: string;
+  service?: boolean;
+};
+
+const BINARIES: readonly Binary[] = [
   { name: "blit", desc: "Low-latency terminal streaming client" },
-  { name: "blit-server", desc: "Low-latency terminal streaming server" },
-  { name: "blit-gateway", desc: "Low-latency terminal streaming WebSocket gateway" },
-] as const;
+  { name: "blit-server", desc: "Low-latency terminal streaming server", service: true },
+  { name: "blit-gateway", desc: "Low-latency terminal streaming WebSocket gateway", service: true },
+];
 
 const PLATFORMS = [
   { os: "darwin", arch: "aarch64" },
@@ -23,6 +29,31 @@ async function sha256(url: string): Promise<string> {
 
 function formulaClass(name: string): string {
   return name.split("-").map((w) => w[0].toUpperCase() + w.slice(1)).join("");
+}
+
+function installBlock(bin: Binary): string {
+  if (!bin.service) {
+    return `  def install
+    bin.install "${bin.name}"
+  end`;
+  }
+  return `  def install
+    bin.install "${bin.name}"
+    (etc/"blit").mkpath
+    (etc/"blit/${bin.name}.env").write "" unless (etc/"blit/${bin.name}.env").exist?
+  end`;
+}
+
+function serviceBlock(bin: Binary): string {
+  if (!bin.service) return "";
+  return `
+  service do
+    run ["/bin/sh", "-c", ". #{etc}/blit/${bin.name}.env 2>/dev/null; exec #{opt_bin}/${bin.name}"]
+    keep_alive true
+    log_path var/"log/${bin.name}.log"
+    error_log_path var/"log/${bin.name}.log"
+  end
+`;
 }
 
 async function main() {
@@ -71,10 +102,8 @@ async function main() {
     end
   end
 
-  def install
-    bin.install "${bin.name}"
-  end
-
+${installBlock(bin)}
+${serviceBlock(bin)}
   test do
     assert_match version.to_s, shell_output("#{bin}/${bin.name} --version")
   end
