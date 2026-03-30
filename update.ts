@@ -4,8 +4,8 @@ const REPO = "indent-com/blit";
 
 const BINARIES = [
   { name: "blit", desc: "Low-latency terminal streaming client" },
-  { name: "blit-server", desc: "Low-latency terminal streaming server" },
-  { name: "blit-gateway", desc: "Low-latency terminal streaming WebSocket gateway" },
+  { name: "blit-server", desc: "Low-latency terminal streaming server", service: true },
+  { name: "blit-gateway", desc: "Low-latency terminal streaming WebSocket gateway", service: true },
 ] as const;
 
 const PLATFORMS = [
@@ -24,6 +24,27 @@ async function sha256(url: string): Promise<string> {
 function formulaClass(name: string): string {
   return name.split("-").map((w) => w[0].toUpperCase() + w.slice(1)).join("");
 }
+
+const SERVICE_BLOCKS: Record<string, string> = {
+  "blit-server": `
+  service do
+    run [opt_bin/"blit-server"]
+    keep_alive true
+    environment_variables BLIT_SOCK: "/tmp/blit.sock", BLIT_SCROLLBACK: "10000"
+    log_path var/"log/blit-server.log"
+    error_log_path var/"log/blit-server.log"
+  end
+`,
+  "blit-gateway": `
+  service do
+    run [opt_bin/"blit-gateway"]
+    keep_alive true
+    environment_variables BLIT_SOCK: "/tmp/blit.sock", BLIT_ADDR: "127.0.0.1:3264"
+    log_path var/"log/blit-gateway.log"
+    error_log_path var/"log/blit-gateway.log"
+  end
+`,
+};
 
 async function main() {
   let version = process.argv[2]?.replace(/^v/, "");
@@ -74,7 +95,7 @@ async function main() {
   def install
     bin.install "${bin.name}"
   end
-
+${SERVICE_BLOCKS[bin.name] ?? ""}
   test do
     assert_match version.to_s, shell_output("#{bin}/${bin.name} --version")
   end
