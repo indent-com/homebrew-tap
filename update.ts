@@ -13,12 +13,12 @@ const BINARIES: readonly Binary[] = [
   {
     name: "blit-server",
     desc: "Low-latency terminal streaming server",
-    serviceEnv: { BLIT_SOCK: "/tmp/blit.sock", BLIT_SCROLLBACK: "10000" },
+    serviceEnv: { BLIT_SCROLLBACK: "10000" },
   },
   {
     name: "blit-gateway",
     desc: "Low-latency terminal streaming WebSocket gateway",
-    serviceEnv: { BLIT_SOCK: "/tmp/blit.sock", BLIT_ADDR: "127.0.0.1:3264" },
+    serviceEnv: { BLIT_ADDR: "127.0.0.1:3264" },
   },
 ];
 
