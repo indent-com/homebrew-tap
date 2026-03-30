@@ -41,7 +41,7 @@ function formulaClass(name: string): string {
 
 function defaultEnvContent(env: Record<string, string>): string {
   return Object.entries(env)
-    .map(([k, v]) => `export ${k}="${v}"`)
+    .map(([k, v]) => `export ${k}=\\"${v}\\"`)
     .join("\\n");
 }
 
