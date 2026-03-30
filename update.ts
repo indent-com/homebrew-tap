@@ -5,21 +5,13 @@ const REPO = "indent-com/blit";
 type Binary = {
   name: string;
   desc: string;
-  defaultEnv?: Record<string, string>;
+  service?: boolean;
 };
 
 const BINARIES: readonly Binary[] = [
   { name: "blit", desc: "Low-latency terminal streaming client" },
-  {
-    name: "blit-server",
-    desc: "Low-latency terminal streaming server",
-    defaultEnv: { BLIT_SCROLLBACK: "10000" },
-  },
-  {
-    name: "blit-gateway",
-    desc: "Low-latency terminal streaming WebSocket gateway",
-    defaultEnv: { BLIT_ADDR: "127.0.0.1:3264" },
-  },
+  { name: "blit-server", desc: "Low-latency terminal streaming server", service: true },
+  { name: "blit-gateway", desc: "Low-latency terminal streaming WebSocket gateway", service: true },
 ];
 
 const PLATFORMS = [
@@ -39,14 +31,8 @@ function formulaClass(name: string): string {
   return name.split("-").map((w) => w[0].toUpperCase() + w.slice(1)).join("");
 }
 
-function defaultEnvContent(env: Record<string, string>): string {
-  return Object.entries(env)
-    .map(([k, v]) => `export ${k}=\\"${v}\\"`)
-    .join("\\n");
-}
-
 function installBlock(bin: Binary): string {
-  if (!bin.defaultEnv) {
+  if (!bin.service) {
     return `  def install
     bin.install "${bin.name}"
   end`;
@@ -54,14 +40,12 @@ function installBlock(bin: Binary): string {
   return `  def install
     bin.install "${bin.name}"
     (etc/"blit").mkpath
-    unless (etc/"blit/${bin.name}.env").exist?
-      (etc/"blit/${bin.name}.env").write "${defaultEnvContent(bin.defaultEnv)}\\n"
-    end
+    (etc/"blit/${bin.name}.env").write "" unless (etc/"blit/${bin.name}.env").exist?
   end`;
 }
 
 function serviceBlock(bin: Binary): string {
-  if (!bin.defaultEnv) return "";
+  if (!bin.service) return "";
   return `
   service do
     run ["/bin/sh", "-c", ". #{etc}/blit/${bin.name}.env 2>/dev/null; exec #{opt_bin}/${bin.name}"]
