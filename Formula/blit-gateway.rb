@@ -1,24 +1,24 @@
 class BlitGateway < Formula
   desc "Low-latency terminal streaming WebSocket gateway"
   homepage "https://blit.sh"
-  version "0.12.1"
+  version "0.12.2"
   license "MIT"
 
   on_macos do
     on_arm do
-      url "https://github.com/indent-com/blit/releases/download/v0.12.1/blit-gateway_0.12.1_darwin_aarch64.tar.gz"
-      sha256 "4e7af94e35746ec07ed21bcbb22c55bb1bac9ace6615808d1d0ec81ea30adaa8"
+      url "https://github.com/indent-com/blit/releases/download/v0.12.2/blit-gateway_0.12.2_darwin_aarch64.tar.gz"
+      sha256 "80a672f129b344f1f5f7f8233fdc458ae48360f1e302c75666ff20ed2b6bb78c"
     end
   end
 
   on_linux do
     on_intel do
-      url "https://github.com/indent-com/blit/releases/download/v0.12.1/blit-gateway_0.12.1_linux_x86_64.tar.gz"
-      sha256 "58af636de66eb1f9be2a91c9ef371beda4b04993906599cb33d79f67af273d6a"
+      url "https://github.com/indent-com/blit/releases/download/v0.12.2/blit-gateway_0.12.2_linux_x86_64.tar.gz"
+      sha256 "961d297c15ca815070da6f3159f51756eebd111092e442e376be358bff9b9d82"
     end
     on_arm do
-      url "https://github.com/indent-com/blit/releases/download/v0.12.1/blit-gateway_0.12.1_linux_aarch64.tar.gz"
-      sha256 "8870e650fc31b7c80b83031556fd66aa8a22953352f76388e6f7a78cb3bafde3"
+      url "https://github.com/indent-com/blit/releases/download/v0.12.2/blit-gateway_0.12.2_linux_aarch64.tar.gz"
+      sha256 "b0004160445be708d25a186f39e7a54cac4a3dd3d5fdedfdeb9073a5bc493b3c"
     end
   end
 
