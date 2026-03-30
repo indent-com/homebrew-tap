@@ -5,7 +5,7 @@ const REPO = "indent-com/blit";
 type Binary = {
   name: string;
   desc: string;
-  serviceEnv?: Record<string, string>;
+  defaultEnv?: Record<string, string>;
 };
 
 const BINARIES: readonly Binary[] = [
@@ -13,12 +13,12 @@ const BINARIES: readonly Binary[] = [
   {
     name: "blit-server",
     desc: "Low-latency terminal streaming server",
-    serviceEnv: { BLIT_SCROLLBACK: "10000" },
+    defaultEnv: { BLIT_SCROLLBACK: "10000" },
   },
   {
     name: "blit-gateway",
     desc: "Low-latency terminal streaming WebSocket gateway",
-    serviceEnv: { BLIT_ADDR: "127.0.0.1:3264" },
+    defaultEnv: { BLIT_ADDR: "127.0.0.1:3264" },
   },
 ];
 
@@ -39,16 +39,33 @@ function formulaClass(name: string): string {
   return name.split("-").map((w) => w[0].toUpperCase() + w.slice(1)).join("");
 }
 
+function defaultEnvContent(env: Record<string, string>): string {
+  return Object.entries(env)
+    .map(([k, v]) => `export ${k}="${v}"`)
+    .join("\\n");
+}
+
+function installBlock(bin: Binary): string {
+  if (!bin.defaultEnv) {
+    return `  def install
+    bin.install "${bin.name}"
+  end`;
+  }
+  return `  def install
+    bin.install "${bin.name}"
+    (etc/"blit").mkpath
+    unless (etc/"blit/${bin.name}.env").exist?
+      (etc/"blit/${bin.name}.env").write "${defaultEnvContent(bin.defaultEnv)}\\n"
+    end
+  end`;
+}
+
 function serviceBlock(bin: Binary): string {
-  if (!bin.serviceEnv) return "";
-  const envPairs = Object.entries(bin.serviceEnv)
-    .map(([k, v]) => `${k}: "${v}"`)
-    .join(", ");
+  if (!bin.defaultEnv) return "";
   return `
   service do
-    run [opt_bin/"${bin.name}"]
+    run ["/bin/sh", "-c", ". #{etc}/blit/${bin.name}.env 2>/dev/null; exec #{opt_bin}/${bin.name}"]
     keep_alive true
-    environment_variables ${envPairs}
     log_path var/"log/${bin.name}.log"
     error_log_path var/"log/${bin.name}.log"
   end
@@ -101,9 +118,7 @@ async function main() {
     end
   end
 
-  def install
-    bin.install "${bin.name}"
-  end
+${installBlock(bin)}
 ${serviceBlock(bin)}
   test do
     assert_match version.to_s, shell_output("#{bin}/${bin.name} --version")
