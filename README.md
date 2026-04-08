@@ -3,12 +3,12 @@
 ## Usage
 
 ```bash
-$ brew install indent-com/tap/blit indent-com/tap/blit-server indent-com/tap/blit-gateway
+$ brew install indent-com/tap/blit
 ```
 
 – or –
 
 ```bash
 $ brew tap indent-com/tap
-$ brew install blit blit-server blit-gateway
+$ brew install blit
 ```
