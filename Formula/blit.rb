@@ -1,24 +1,24 @@
 class Blit < Formula
   desc "Low-latency terminal streaming client"
   homepage "https://blit.sh"
-  version "0.22.0"
+  version "0.30.0"
   license "MIT"
 
   on_macos do
     on_arm do
-      url "https://github.com/indent-com/blit/releases/download/v0.22.0/blit_0.22.0_darwin_aarch64.tar.gz"
-      sha256 "9537e13e61d3f0d91b4f5abc79611b17bb0b0761862c0d78977d6c012a04ac97"
+      url "https://github.com/indent-com/blit/releases/download/v0.30.0/blit_0.30.0_darwin_aarch64.tar.gz"
+      sha256 "a6f20d6a8286640294ab2ff39fe948c6763563ffdb94517a64db6f7058f48f9a"
     end
   end
 
   on_linux do
     on_intel do
-      url "https://github.com/indent-com/blit/releases/download/v0.22.0/blit_0.22.0_linux_x86_64.tar.gz"
-      sha256 "0e5595616c14862e2e6ae5498db65aa6f4824317513cb539d84ce3b6f5563a14"
+      url "https://github.com/indent-com/blit/releases/download/v0.30.0/blit_0.30.0_linux_x86_64.tar.gz"
+      sha256 "112b589c8012e4a94dec5ecfeada4851a8ba60cbab91492ed8f54938f05ea04a"
     end
     on_arm do
-      url "https://github.com/indent-com/blit/releases/download/v0.22.0/blit_0.22.0_linux_aarch64.tar.gz"
-      sha256 "620c175d1a64bfd84310e1795fbc501383cd4adb40471f03e6dd76caf8f092b6"
+      url "https://github.com/indent-com/blit/releases/download/v0.30.0/blit_0.30.0_linux_aarch64.tar.gz"
+      sha256 "d4d680b74c3692b064ee8940047669e0b96e1116e583e08b4e9aaf86843910c4"
     end
   end
 
